@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 params = {'legend.fontsize': 'x-large',
           'figure.figsize': (15, 5),
          'axes.labelsize': 'xx-small',
@@ -10,7 +11,9 @@ import numpy as np
 import math
 from math import factorial
 
-HStress, HStrain, VStress=np.loadtxt('5_3 (3).csv',delimiter=',',skiprows=1, unpack=True)
+
+fileName = '5_1 (3)'
+HStress, HStrain, VStress=np.loadtxt(fileName + '.csv',delimiter=',',skiprows=1, unpack=True)
 
 
 #Smoothing function defined here
@@ -131,23 +134,57 @@ print('Number of cycles=', len(cycles_true))
 ## calculated via len(cycles_true), it may be possible to develop nicer diagrams. I am not sure if they want us to have them be 3 wide, 
 ## but look on your own to see what works best. 
 
-width = 36
-height = 36
+
+width = 18
+height = 24
 rows = 5
-cols = 1
+cols = 5
+
+Hstrain_smoothed_cycles = []
+Hstress_smoothed_cycles = []
 
 plt.figure(figsize=(width, height)) # figsize is (width, height) in inches 
 for i in range(len(cycles_true) - 1):
-    plt.subplot(rows,cols,i+1) # subplot(x, y, i+1) means the overall figure has x rows, y cols, and that this is the i+1th subplot
-    plt.plot(HStrain_smoothed[cycles_true[i]:cycles_true[i+1]], HStress_smoothed[cycles_true[i]:cycles_true[i+1]])
-    plt.title("Cycle " + str(i))
-    plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=.27, hspace=1.2)  # !!!!Adjust values wspace and hspace as needed to make pretty
+    Hstrain_smoothed_cycles.append(HStrain_smoothed[cycles_true[i]:cycles_true[i+1]])
+    Hstress_smoothed_cycles.append(HStress_smoothed[cycles_true[i]:cycles_true[i+1]])
+    # plt.subplot(rows,cols,i+1) # subplot(x, y, i+1) means the overall figure has x rows, y cols, and that this is the i+1th subplot
+    # plt.plot(HStrain_smoothed[cycles_true[i]:cycles_true[i+1]], HStress_smoothed[cycles_true[i]:cycles_true[i+1]])
+    # plt.title("Cycle " + str(i+1))
+    # plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=.27, hspace=1.2)  # !!!!Adjust values wspace and hspace as needed to make pretty
  
 
 # Plotting the last cycle, a bit annoying
-plt.subplot(rows,cols,len(cycles_true))
-plt.plot(HStrain_smoothed[cycles_true[-1]:], HStress_smoothed[cycles_true[-1]:])
-plt.title("Cycle " + str(len(cycles_true) - 1))
+# plt.subplot(rows,cols,len(cycles_true))
+# plt.plot(HStrain_smoothed[cycles_true[-1]:], HStress_smoothed[cycles_true[-1]:])
+# plt.title("Cycle " + str(len(cycles_true)))
+Hstrain_smoothed_cycles.append(HStrain_smoothed[cycles_true[-1]:])
+Hstress_smoothed_cycles.append(HStress_smoothed[cycles_true[-1]:])
 
-plt.show()
+with PdfPages(fileName+".pdf") as pdf:
+    for page in range(len(cycles_true)//25):
+        plt.figure(figsize=(width, height))
+        cnt = 0
+        for i in range(25*page, 25*page + 24):
+            if i == len(cycles_true):
+                break
+            plt.subplot(rows,cols,cnt+1)
+            cnt += 1
+            plt.plot(Hstrain_smoothed_cycles[i], Hstress_smoothed_cycles[i])
+            plt.title("Cycle " + str(i+1))
+        if len(cycles_true) != 25*page + 24:
+            plt.subplot(rows, cols, 25)
+            plt.plot(Hstrain_smoothed_cycles[25*page+24], Hstress_smoothed_cycles[25*page+24])
+            plt.title("Cycle " + str(25*page+25))
+        pdf.savefig()
+        plt.close()
+    if 25 * (len(cycles_true)//25) != len(cycles_true): # plot last page separately
+        plt.figure(figsize=(width, height))
+        cnt = 0
+        for i in range(25 * (len(cycles_true)//25), len(cycles_true)):
+            plt.subplot(rows,cols,cnt+1)
+            cnt += 1
+            plt.plot(Hstrain_smoothed_cycles[i], Hstress_smoothed_cycles[i])
+            plt.title("Cycle " + str(i+1))
+        pdf.savefig()
+        plt.close()
 
