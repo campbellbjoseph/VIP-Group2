@@ -1,9 +1,16 @@
 import matplotlib.pyplot as plt
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (15, 5),
+         'axes.labelsize': 'xx-small',
+         'axes.titlesize':'xx-small',
+         'xtick.labelsize':'xx-small',
+         'ytick.labelsize':'xx-small'}
+plt.rcParams.update(params)
 import numpy as np
 import math
 from math import factorial
 
-HStress, HStrain, VStress=np.loadtxt('4_1 (1).csv',delimiter=',',skiprows=1, unpack=True)
+HStress, HStrain, VStress=np.loadtxt('5_3 (3).csv',delimiter=',',skiprows=1, unpack=True)
 
 
 #Smoothing function defined here
@@ -126,21 +133,21 @@ print('Number of cycles=', len(cycles_true))
 
 width = 36
 height = 36
-rows = 9
-cols = 3
+rows = 5
+cols = 1
 
 plt.figure(figsize=(width, height)) # figsize is (width, height) in inches 
 for i in range(len(cycles_true) - 1):
     plt.subplot(rows,cols,i+1) # subplot(x, y, i+1) means the overall figure has x rows, y cols, and that this is the i+1th subplot
     plt.plot(HStrain_smoothed[cycles_true[i]:cycles_true[i+1]], HStress_smoothed[cycles_true[i]:cycles_true[i+1]])
-    plt.xlabel('Shear Strain (%)')
-    plt.ylabel('Shear Stress (kPa)') # Not sure if they only want us to horizontal, pretty easy to add this as well 
+    plt.title("Cycle " + str(i))
+    plt.subplots_adjust(left=0.1, right=0.9, bottom=0.1, top=0.9, wspace=.27, hspace=1.2)  # !!!!Adjust values wspace and hspace as needed to make pretty
+ 
 
 # Plotting the last cycle, a bit annoying
 plt.subplot(rows,cols,len(cycles_true))
 plt.plot(HStrain_smoothed[cycles_true[-1]:], HStress_smoothed[cycles_true[-1]:])
-plt.xlabel('Shear Strain (%)')
-plt.ylabel('Shear Stress (kPa)')
+plt.title("Cycle " + str(len(cycles_true) - 1))
 
 plt.show()
 
